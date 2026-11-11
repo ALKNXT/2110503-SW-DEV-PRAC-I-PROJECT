@@ -39,12 +39,10 @@ exports.login = async (req, res) => {
       !email.trim() ||
       !password
     ) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: 'Please provide an email and password',
-        });
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide an email and password',
+      });
     }
 
     const user = await User.findOne({

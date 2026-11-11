@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
 const auth = require('./routes/auth');
+const providers = require('./routes/providers');
 
 dotenv.config({ path: './config/config.env' });
 
@@ -13,7 +14,9 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.status(200).json({ success: true, data: { id: 1 } });
 });
+
 app.use('/api/v1/auth', auth);
+app.use('/api/v1/providers', providers);
 
 const PORT = process.env.PORT || 5000;
 

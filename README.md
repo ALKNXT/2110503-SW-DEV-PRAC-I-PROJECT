@@ -85,7 +85,7 @@ npm run dev
 In another terminal, run the collection and generate the HTML report:
 
 ```bash
-npx newman run ./sw-dev-prac-1-project.postman_collection.json --environment ./local.postman_environment.json --reporters cli,htmlextra --reporter-htmlextra-export ./newman/newman-report.html
+newman run .\sw-dev-prac-1-project.postman_collection.json -r htmlextra
 ```
 
 Newman prints the test results in the terminal and writes the HTML report to `newman/newman-report.html`. The `newman/` report directory and the local environment file should be excluded from Git. The collection creates test users, providers, and bookings in the configured database; use a development database for these runs.

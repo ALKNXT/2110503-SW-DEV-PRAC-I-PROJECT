@@ -2,3 +2,5 @@
 node_modules/*
 #ignore config file
 config/config.env
+#ignore newman report
+newman/*-report.html

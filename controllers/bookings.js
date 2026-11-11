@@ -44,10 +44,7 @@ const parseBookingDate = (value) => {
 };
 
 const canManageBooking = (booking, user) => {
-  return (
-    user.role === 'admin' ||
-    booking.user.toString() === user.id
-  );
+  return user.role === 'admin' || booking.user.toString() === user.id;
 };
 
 // GET /api/v1/bookings
@@ -155,17 +152,33 @@ exports.createBooking = async (req, res) => {
       });
     }
 
-    const booking = await Booking.create({
-      bookingDate,
-      user: req.user.id,
-      provider: provider._id,
-    });
+    
+    for (const slot of [1, 2, 3]) {
+      let booking;
 
-    await booking.populate('provider', 'name address telephone');
+      try {
+        booking = await Booking.create({
+          bookingDate,
+          user: req.user.id,
+          provider: provider._id,
+          slot,
+        });
+      } catch (error) {
+        if (error.code === 11000) continue;
+        throw error;
+      }
 
-    return res.status(201).json({
-      success: true,
-      data: booking,
+      await booking.populate('provider', 'name address telephone');
+
+      return res.status(201).json({
+        success: true,
+        data: booking,
+      });
+    }
+
+    return res.status(409).json({
+      success: false,
+      message: 'A user can have no more than 3 bookings',
     });
   } catch (error) {
     return handleBookingError(res, error, 'Create');

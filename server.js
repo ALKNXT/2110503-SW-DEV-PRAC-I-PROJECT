@@ -1,6 +1,8 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
+const Booking = require('./models/Booking');
+const migrateBookingSlots = require('./config/migrateBookingSlots');
 
 const auth = require('./routes/auth');
 const providers = require('./routes/providers');
@@ -18,13 +20,15 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/providers', providers);
-app.use('/api/v1/bookings', bookings)
+app.use('/api/v1/bookings', bookings);
 
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
     await connectDB();
+    await migrateBookingSlots();
+    await Booking.createIndexes();
     app.listen(PORT, () => {
       console.log(
         `Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`,

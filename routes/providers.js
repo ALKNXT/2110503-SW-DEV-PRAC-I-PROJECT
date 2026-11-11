@@ -4,6 +4,7 @@ const {
   getProvider,
   createProvider,
   updateProvider,
+  updateProviderStatus,
   deleteProvider,
 } = require('../controllers/providers');
 const { protect, authorize } = require('../middleware/auth');
@@ -14,6 +15,13 @@ router
   .route('/')
   .get(protect, getProviders)
   .post(protect, authorize('admin'), createProvider);
+
+router.patch(
+  '/:id/status',
+  protect,
+  authorize('admin'),
+  updateProviderStatus,
+);
 
 router
   .route('/:id')

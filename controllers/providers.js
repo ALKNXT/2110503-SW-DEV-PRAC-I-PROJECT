@@ -117,6 +117,40 @@ exports.updateProvider = async (req, res) => {
   }
 };
 
+// PATCH /api/v1/providers/:id/status
+// Activate a previously deactivated provider.
+exports.updateProviderStatus = async (req, res) => {
+  if (req.body?.isActive !== true) {
+    return res.status(400).json({
+      success: false,
+      message: 'isActive must be true to activate a provider',
+    });
+  }
+
+  try {
+    // Find by id without filtering isActive so inactive providers can be restored.
+    const provider = await Provider.findById(req.params.id);
+
+    if (!provider) {
+      return res.status(404).json({
+        success: false,
+        message: 'Provider not found',
+      });
+    }
+
+    provider.isActive = true;
+    await provider.save();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Provider activated',
+      data: provider,
+    });
+  } catch (error) {
+    return handleProviderError(res, error, 'Update status for');
+  }
+};
+
 // DELETE /api/v1/providers/:id
 // Soft delete: hides the provider instead of removing its document.
 exports.deleteProvider = async (req, res) => {

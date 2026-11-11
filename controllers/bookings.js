@@ -1,5 +1,14 @@
+const mongoose = require('mongoose');
 const Booking = require('../models/Booking');
 const Provider = require('../models/Provider');
+
+const parseObjectId = (value) => {
+  if (typeof value !== 'string' || !/^[a-f\d]{24}$/i.test(value)) {
+    return null;
+  }
+
+  return new mongoose.Types.ObjectId(value);
+};
 
 const handleBookingError = (res, error, action) => {
   if (error.name === 'ValidationError' || error.name === 'CastError') {
@@ -17,7 +26,6 @@ const handleBookingError = (res, error, action) => {
   });
 };
 
-// รับวันที่รูปแบบ YYYY-MM-DD และเก็บเป็นเวลาเที่ยงคืน UTC
 const parseBookingDate = (value) => {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
     return null;
@@ -52,7 +60,6 @@ exports.getBookings = async (req, res) => {
       .sort({ bookingDate: 1 })
       .populate('provider', 'name address telephone');
 
-    // ให้ Admin เห็นข้อมูลเจ้าของ booking ด้วย
     if (isAdmin) {
       query = query.populate('user', 'name email telephone');
     }
@@ -116,15 +123,17 @@ exports.createBooking = async (req, res) => {
       });
     }
 
-    if (typeof providerId !== 'string' || !providerId.trim()) {
+    const providerObjectId = parseObjectId(providerId);
+
+    if (!providerObjectId) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a providerId',
+        message: 'providerId must be a valid provider id',
       });
     }
 
     const provider = await Provider.findOne({
-      _id: providerId,
+      _id: providerObjectId,
       isActive: true,
     });
 
@@ -200,7 +209,9 @@ exports.updateBooking = async (req, res) => {
     }
 
     if (body.providerId !== undefined) {
-      if (typeof body.providerId !== 'string' || !body.providerId.trim()) {
+      const providerObjectId = parseObjectId(body.providerId);
+
+      if (!providerObjectId) {
         return res.status(400).json({
           success: false,
           message: 'providerId must be a valid provider id',
@@ -208,7 +219,7 @@ exports.updateBooking = async (req, res) => {
       }
 
       const provider = await Provider.findOne({
-        _id: body.providerId,
+        _id: providerObjectId,
         isActive: true,
       });
 

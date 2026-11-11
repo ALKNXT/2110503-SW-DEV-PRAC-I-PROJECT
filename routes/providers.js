@@ -16,12 +16,7 @@ router
   .get(protect, getProviders)
   .post(protect, authorize('admin'), createProvider);
 
-router.patch(
-  '/:id/status',
-  protect,
-  authorize('admin'),
-  updateProviderStatus,
-);
+router.patch('/:id/status', protect, authorize('admin'), updateProviderStatus);
 
 router
   .route('/:id')

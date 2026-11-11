@@ -18,13 +18,32 @@ const bookingSchema = new mongoose.Schema(
       required: [true, 'Please select a rental car provider'],
       index: true,
     },
+    slot: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 3,
+      select: false,
+    },
   },
   {
     timestamps: true,
+    // Index creation is explicitly awaited after legacy data is migrated.
+    autoIndex: false,
+    toJSON: {
+      transform: (_document, returnedObject) => {
+        delete returnedObject.slot;
+        delete returnedObject.__v;
+        return returnedObject;
+      },
+    },
   },
 );
 
-bookingSchema.index({ user: 1, bookingDate: 1 });
+bookingSchema.index(
+  { user: 1, slot: 1 },
+  { unique: true, name: 'unique_booking_slot_per_user' },
+);
 
 module.exports =
   mongoose.models.Booking ||

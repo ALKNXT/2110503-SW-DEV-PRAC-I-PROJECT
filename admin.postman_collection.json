@@ -1,0 +1,569 @@
+{
+  "info": {
+    "name": "sw-dev-prac-1-project - Presentation Admin",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Uses the reference collection variable names, default values, Bearer authentication, JSON bodies and pm.environment scripts. Select the SAME Postman environment for User and Admin. Run User first with Keep variable values enabled, then Admin. Configuration defaults (URL, TEST_PASSWORD, TEST_TEL, ADMIN_EMAIL, ADMIN_PASSWORD) are copied to the selected environment only when missing or blank. Registration generates a fresh TEST_EMAIL. BOOKING_ID is booking A, BOOKING_ID_2 is booking B and BOOKING_ID_3 is booking C. Requires an existing admin and an active provider. The configured PROVIDER_ID is preferred if active; otherwise the first active provider is selected. Expected 400/401/404/409 responses have passing tests. Admin steps 9-12 edit and delete B; C remains."
+  },
+  "variable": [
+    {
+      "key": "URL",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "TEST_EMAIL",
+      "value": "newman_1794393981911@example.com",
+      "type": "string"
+    },
+    {
+      "key": "TEST_PASSWORD",
+      "value": "NewmanPass123",
+      "type": "string"
+    },
+    {
+      "key": "USER_TOKEN",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhZjQ0NzdkZDdkNmQ3ZTA1MWY4ZjJiMCIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzk0Mzk5MDQ3LCJleHAiOjE3OTY5OTEwNDd9.mcN9OuwFQMmah8T6SUFj-RsUHOc9fe29OAokDImjggE",
+      "type": "string"
+    },
+    {
+      "key": "ADMIN_EMAIL",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "ADMIN_PASSWORD",
+      "value": "admin123",
+      "type": "string"
+    },
+    {
+      "key": "ADMIN_TOKEN",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhZjM0MTYxMjg3ZDc1YTM0NTA5NTUzZiIsInRva2VuVmVyc2lvbiI6MywiaWF0IjoxNzk0Mzk4OTQwLCJleHAiOjE3OTY5OTA5NDB9.whBcY6N2kIqaosUTvkByfsjB7i2nLKYgrRbwC1xW97M",
+      "type": "string"
+    },
+    {
+      "key": "PROVIDER_ID",
+      "value": "6af45d8bd7d6d7e051f8f2b3",
+      "type": "string"
+    },
+    {
+      "key": "BOOKING_ID",
+      "value": "6af4634ac6c348afd07d632d",
+      "type": "string"
+    },
+    {
+      "key": "UPDATED_PROVIDER_NAME",
+      "value": "Updated Provider 1794399954984995",
+      "type": "string"
+    },
+    {
+      "key": "UPDATED_BOOKING_DATE",
+      "value": "2026-11-25",
+      "type": "string"
+    },
+    {
+      "key": "TEST_TEL",
+      "value": "0812345678",
+      "type": "string"
+    },
+    {
+      "key": "PROVIDER_NAME",
+      "value": "Newman Provider 1794399627031424",
+      "type": "string"
+    },
+    {
+      "key": "PROVIDER_TEL",
+      "value": "0279308937",
+      "type": "string"
+    },
+    {
+      "key": "USER_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "BOOKING_ID_2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "BOOKING_ID_3",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "09.1 Admin login (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/login",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{ADMIN_EMAIL}}\",\n  \"password\": \"{{ADMIN_PASSWORD}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "for (const key of [\"USER_ID\", \"BOOKING_ID_2\", \"BOOKING_ID_3\"]) { if (!pm.environment.get(key)) throw new Error(\"Run the User collection first with the same selected environment. Missing: \" + key); }",
+                  "if (!pm.environment.get(\"ADMIN_EMAIL\") || !pm.environment.get(\"ADMIN_PASSWORD\")) throw new Error(\"Set ADMIN_EMAIL and ADMIN_PASSWORD in the selected environment or collection Variables\");"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Admin token returned\", () => pm.expect(body.token).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 200 && body.success === true) {",
+                  "pm.environment.set(\"ADMIN_TOKEN\", body.token);",
+                  "}"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "09.2 Confirm admin role (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ADMIN_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/me",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Account has admin role\", () => pm.expect(body.data.role).to.eql(\"admin\"));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "item": [
+        {
+          "name": "10.1 Admin views all bookings including demo user (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ADMIN_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Admin can see demo user's B and C\", () => { const ids = body.data.map(b => b._id); pm.expect(ids).to.include(pm.environment.get(\"BOOKING_ID_2\")); pm.expect(ids).to.include(pm.environment.get(\"BOOKING_ID_3\")); const booking = body.data.find(b => b._id === pm.environment.get(\"BOOKING_ID_2\")); pm.expect(booking.user._id).to.eql(pm.environment.get(\"USER_ID\")); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "10.2 Admin views user booking B details (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ADMIN_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID_2}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID_2}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Booking B belongs to demo user\", () => { pm.expect(body.data._id).to.eql(pm.environment.get(\"BOOKING_ID_2\")); pm.expect(body.data.user._id).to.eql(pm.environment.get(\"USER_ID\")); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "11.1 Admin edits user booking B (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ADMIN_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID_2}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID_2}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingDate\": \"{{UPDATED_BOOKING_DATE}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "const date = new Date();",
+                  "date.setUTCDate(date.getUTCDate() + 21);",
+                  "pm.environment.set(\"UPDATED_BOOKING_DATE\", date.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Correct booking and updated date\", () => { pm.expect(body.data._id).to.eql(pm.environment.get(\"BOOKING_ID_2\")); pm.expect(body.data.bookingDate.slice(0, 10)).to.eql(pm.environment.get(\"UPDATED_BOOKING_DATE\")); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "11.2 Verify admin edit was saved (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ADMIN_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID_2}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID_2}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Correct booking and updated date\", () => { pm.expect(body.data._id).to.eql(pm.environment.get(\"BOOKING_ID_2\")); pm.expect(body.data.bookingDate.slice(0, 10)).to.eql(pm.environment.get(\"UPDATED_BOOKING_DATE\")); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "12.1 Admin deletes user booking B (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ADMIN_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID_2}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID_2}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Booking B deleted\", () => pm.expect(body.data.id).to.eql(pm.environment.get(\"BOOKING_ID_2\")));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "12.2 Verify booking B no longer exists (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{ADMIN_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID_2}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID_2}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is false\", () => pm.expect(body.success).to.eql(false));",
+                  "pm.test(\"Booking not found\", () => pm.expect(body.message).to.eql(\"Booking not found\"));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "// Reuse the reference collection configuration in the selected environment.",
+          "for (const key of [\"URL\", \"TEST_PASSWORD\", \"TEST_TEL\", \"ADMIN_EMAIL\", \"ADMIN_PASSWORD\"]) {",
+          "  const current = pm.environment.get(key);",
+          "  if (current === undefined || current === null || current === \"\") {",
+          "    pm.environment.set(key, pm.collectionVariables.get(key));",
+          "  }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}

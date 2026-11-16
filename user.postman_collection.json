@@ -1,0 +1,1207 @@
+{
+  "info": {
+    "name": "sw-dev-prac-1-project - Presentation User",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Uses the reference collection variable names, default values, Bearer authentication, JSON bodies and pm.environment scripts. Select the SAME Postman environment for User and Admin. Run User first with Keep variable values enabled, then Admin. Configuration defaults (URL, TEST_PASSWORD, TEST_TEL, ADMIN_EMAIL, ADMIN_PASSWORD) are copied to the selected environment only when missing or blank. Registration generates a fresh TEST_EMAIL. BOOKING_ID is booking A, BOOKING_ID_2 is booking B and BOOKING_ID_3 is booking C. Requires an existing admin and an active provider. The configured PROVIDER_ID is preferred if active; otherwise the first active provider is selected. Expected 400/401/404/409 responses have passing tests. User steps 1-8 leave bookings B and C for Admin."
+  },
+  "variable": [
+    {
+      "key": "URL",
+      "value": "http://localhost:5000",
+      "type": "string"
+    },
+    {
+      "key": "TEST_EMAIL",
+      "value": "newman_1794393981911@example.com",
+      "type": "string"
+    },
+    {
+      "key": "TEST_PASSWORD",
+      "value": "NewmanPass123",
+      "type": "string"
+    },
+    {
+      "key": "USER_TOKEN",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhZjQ0NzdkZDdkNmQ3ZTA1MWY4ZjJiMCIsInRva2VuVmVyc2lvbiI6MSwiaWF0IjoxNzk0Mzk5MDQ3LCJleHAiOjE3OTY5OTEwNDd9.mcN9OuwFQMmah8T6SUFj-RsUHOc9fe29OAokDImjggE",
+      "type": "string"
+    },
+    {
+      "key": "ADMIN_EMAIL",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "ADMIN_PASSWORD",
+      "value": "admin123",
+      "type": "string"
+    },
+    {
+      "key": "ADMIN_TOKEN",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhZjM0MTYxMjg3ZDc1YTM0NTA5NTUzZiIsInRva2VuVmVyc2lvbiI6MywiaWF0IjoxNzk0Mzk4OTQwLCJleHAiOjE3OTY5OTA5NDB9.whBcY6N2kIqaosUTvkByfsjB7i2nLKYgrRbwC1xW97M",
+      "type": "string"
+    },
+    {
+      "key": "PROVIDER_ID",
+      "value": "6af45d8bd7d6d7e051f8f2b3",
+      "type": "string"
+    },
+    {
+      "key": "BOOKING_ID",
+      "value": "6af4634ac6c348afd07d632d",
+      "type": "string"
+    },
+    {
+      "key": "UPDATED_PROVIDER_NAME",
+      "value": "Updated Provider 1794399954984995",
+      "type": "string"
+    },
+    {
+      "key": "UPDATED_BOOKING_DATE",
+      "value": "2026-11-25",
+      "type": "string"
+    },
+    {
+      "key": "TEST_TEL",
+      "value": "0812345678",
+      "type": "string"
+    },
+    {
+      "key": "PROVIDER_NAME",
+      "value": "Newman Provider 1794399627031424",
+      "type": "string"
+    },
+    {
+      "key": "PROVIDER_TEL",
+      "value": "0279308937",
+      "type": "string"
+    },
+    {
+      "key": "USER_ID",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "BOOKING_ID_2",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "BOOKING_ID_3",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "01.1 Register - invalid input (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/register",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Newman Test\",\n  \"email\": \"invalid-email\",\n  \"password\": \"short\",\n  \"telephone\": \"{{TEST_TEL}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is false\", () => pm.expect(body.success).to.eql(false));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.2 Register - valid new user (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/register",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Newman Test\",\n  \"email\": \"{{TEST_EMAIL}}\",\n  \"password\": \"{{TEST_PASSWORD}}\",\n  \"telephone\": \"{{TEST_TEL}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.environment.set(\"TEST_EMAIL\", `newman_${Date.now()}@example.com`);",
+                  "pm.environment.set(\"TEST_PASSWORD\", \"NewmanPass123\");",
+                  "pm.environment.set(\"TEST_TEL\", \"0812345678\");",
+                  "pm.environment.unset(\"USER_TOKEN\");",
+                  "pm.environment.unset(\"ADMIN_TOKEN\");",
+                  "pm.environment.unset(\"USER_ID\");",
+                  "pm.environment.unset(\"BOOKING_ID\");",
+                  "pm.environment.unset(\"BOOKING_ID_2\");",
+                  "pm.environment.unset(\"BOOKING_ID_3\");"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Registration returns token\", () => pm.expect(body.token).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 201 && body.success === true && body.token) pm.environment.set(\"USER_TOKEN\", body.token);"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "01.3 Register - duplicate email (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/register",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Newman Test\",\n  \"email\": \"{{TEST_EMAIL}}\",\n  \"password\": \"{{TEST_PASSWORD}}\",\n  \"telephone\": \"{{TEST_TEL}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is false\", () => pm.expect(body.success).to.eql(false));",
+                  "pm.test(\"Duplicate email rejected\", () => pm.expect(body.message).to.eql(\"Email is already registered\"));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "02.1 User login (200)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/login",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{TEST_EMAIL}}\",\n  \"password\": \"{{TEST_PASSWORD}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"User token returned\", () => pm.expect(body.token).to.be.a(\"string\").and.not.empty);",
+                  "if (pm.response.code === 200 && body.success === true) {",
+                  "pm.environment.set(\"USER_TOKEN\", body.token);",
+                  "}"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "02.2 Confirm user identity (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/me",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Logged in as demo user\", () => { pm.expect(body.data.email).to.eql(pm.environment.get(\"TEST_EMAIL\")); pm.expect(body.data.role).to.eql(\"user\"); });",
+                  "if (pm.response.code === 200 && body.success === true) {",
+                  "pm.environment.set(\"USER_ID\", body.data._id);",
+                  "}"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Providers",
+      "item": [
+        {
+          "name": "03.1 User views providers - select active provider (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/providers",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "providers"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"An active provider is available for booking\", () => { pm.expect(body.data).to.be.an(\"array\"); pm.expect(body.data.length, \"Create an active provider before this demo\").to.be.above(0); });",
+                  "if (pm.response.code === 200 && body.success === true) {",
+                  "if (!Array.isArray(body.data) || !body.data.length) { throw new Error(\"Create an active provider before running this demo\"); }",
+                  "const preferredId = pm.environment.get(\"PROVIDER_ID\") || pm.collectionVariables.get(\"PROVIDER_ID\");",
+                  "const provider = body.data.find(provider => provider._id === preferredId) || body.data[0];",
+                  "pm.environment.set(\"PROVIDER_ID\", provider._id);",
+                  "}"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "03.2 User views provider details (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/providers/{{PROVIDER_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "providers",
+                "{{PROVIDER_ID}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Selected provider returned\", () => pm.expect(body.data._id).to.eql(pm.environment.get(\"PROVIDER_ID\")));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Booking",
+      "item": [
+        {
+          "name": "04.1 User creates booking A (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingDate\": \"2026-12-10\",\n  \"providerId\": \"{{PROVIDER_ID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Booking belongs to user\", () => { pm.expect(body.data.user).to.eql(pm.environment.get(\"USER_ID\")); pm.expect(body.data.bookingDate.slice(0, 10)).to.eql(\"2026-12-10\"); });",
+                  "if (pm.response.code === 201 && body.success === true) {",
+                  "pm.environment.set(\"BOOKING_ID\", body.data._id);",
+                  "}"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "04.2 User creates booking B (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingDate\": \"2026-12-11\",\n  \"providerId\": \"{{PROVIDER_ID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Booking belongs to user\", () => { pm.expect(body.data.user).to.eql(pm.environment.get(\"USER_ID\")); pm.expect(body.data.bookingDate.slice(0, 10)).to.eql(\"2026-12-11\"); });",
+                  "if (pm.response.code === 201 && body.success === true) {",
+                  "pm.environment.set(\"BOOKING_ID_2\", body.data._id);",
+                  "}"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "04.3 User creates booking C (201)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingDate\": \"2026-12-12\",\n  \"providerId\": \"{{PROVIDER_ID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Booking belongs to user\", () => { pm.expect(body.data.user).to.eql(pm.environment.get(\"USER_ID\")); pm.expect(body.data.bookingDate.slice(0, 10)).to.eql(\"2026-12-12\"); });",
+                  "if (pm.response.code === 201 && body.success === true) {",
+                  "pm.environment.set(\"BOOKING_ID_3\", body.data._id);",
+                  "}"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "04.4 Fourth booking is rejected (409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingDate\": \"2026-12-12\",\n  \"providerId\": \"{{PROVIDER_ID}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is false\", () => pm.expect(body.success).to.eql(false));",
+                  "pm.test(\"Three-booking limit enforced\", () => pm.expect(body.message).to.eql(\"A user can have no more than 3 bookings\"));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "05.1 User views own three bookings (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Exactly A, B and C, all owned by current user\", () => { pm.expect(body.count).to.eql(3); pm.expect(body.data.map(b => b._id)).to.have.members([pm.environment.get(\"BOOKING_ID\"), pm.environment.get(\"BOOKING_ID_2\"), pm.environment.get(\"BOOKING_ID_3\")]); body.data.forEach(b => pm.expect(b.user).to.eql(pm.environment.get(\"USER_ID\"))); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "05.2 User views booking A details (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Booking A returned\", () => pm.expect(body.data._id).to.eql(pm.environment.get(\"BOOKING_ID\")));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "06.1 User edits booking A (200)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "description": "JSON Type",
+                "type": "text"
+              }
+            ],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID}}"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"bookingDate\": \"{{UPDATED_BOOKING_DATE}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {},
+                "exec": [
+                  "const date = new Date();",
+                  "date.setUTCDate(date.getUTCDate() + 14);",
+                  "pm.environment.set(\"UPDATED_BOOKING_DATE\", date.toISOString().slice(0, 10));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Correct booking and updated date\", () => { pm.expect(body.data._id).to.eql(pm.environment.get(\"BOOKING_ID\")); pm.expect(body.data.bookingDate.slice(0, 10)).to.eql(pm.environment.get(\"UPDATED_BOOKING_DATE\")); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "06.2 Verify user edit was saved (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Correct booking and updated date\", () => { pm.expect(body.data._id).to.eql(pm.environment.get(\"BOOKING_ID\")); pm.expect(body.data.bookingDate.slice(0, 10)).to.eql(pm.environment.get(\"UPDATED_BOOKING_DATE\")); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "07.1 User deletes booking A (200)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings/{{BOOKING_ID}}",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings",
+                "{{BOOKING_ID}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Booking A deleted\", () => pm.expect(body.data.id).to.eql(pm.environment.get(\"BOOKING_ID\")));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "07.2 Verify B and C remain for admin demo (200)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/bookings",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "bookings"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Only bookings B and C remain\", () => { pm.expect(body.count).to.eql(2); pm.expect(body.data.map(b => b._id)).to.have.members([pm.environment.get(\"BOOKING_ID_2\"), pm.environment.get(\"BOOKING_ID_3\")]); });"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Session Cleanup",
+      "item": [
+        {
+          "name": "08.1 User logout (200)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/logout",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is true\", () => pm.expect(body.success).to.eql(true));",
+                  "pm.test(\"Logout acknowledged\", () => pm.expect(body.message).to.eql(\"Logged out successfully\"));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        },
+        {
+          "name": "08.2 Old user token is rejected (401)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{USER_TOKEN}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{URL}}/api/v1/auth/me",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+                  "pm.test(\"Response is JSON\", () => pm.response.to.be.json);",
+                  "pm.test(\"Response under 3 seconds\", () => pm.expect(pm.response.responseTime).to.be.below(3000));",
+                  "const body = pm.response.json();",
+                  "pm.test(\"success is false\", () => pm.expect(body.success).to.eql(false));"
+                ],
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "// Reuse the reference collection configuration in the selected environment.",
+          "for (const key of [\"URL\", \"TEST_PASSWORD\", \"TEST_TEL\", \"ADMIN_EMAIL\", \"ADMIN_PASSWORD\"]) {",
+          "  const current = pm.environment.get(key);",
+          "  if (current === undefined || current === null || current === \"\") {",
+          "    pm.environment.set(key, pm.collectionVariables.get(key));",
+          "  }",
+          "}"
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}

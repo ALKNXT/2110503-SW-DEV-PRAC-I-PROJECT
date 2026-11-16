@@ -82,10 +82,32 @@ Start the API in one terminal:
 npm run dev
 ```
 
-In another terminal, run the collection and generate the HTML report:
+In another terminal, run the User and Admin collections separately. Ensure that the configured database contains an admin account and at least one active rental car provider.
 
-```bash
-newman run .\sw-dev-prac-1-project.postman_collection.json -r htmlextra
+### Run the User tests
+
+Run the User collection and export its environment variables:
+
+```powershell
+newman run .\user.postman_collection.json -r htmlextra --export-environment .\tmp.postman_environment.json
 ```
 
-Newman prints the test results in the terminal and writes the HTML report to `newman/newman-report.html`. The `newman/` report directory and the local environment file should be excluded from Git. The collection creates test users, providers, and bookings in the configured database; use a development database for these runs.
+### Run the Admin tests
+
+After all User tests pass, run the Admin collection using the exported environment:
+
+```powershell
+newman run .\admin.postman_collection.json -r htmlextra -e .\tmp.postman_environment.json
+```
+
+The exported environment contains the user and booking IDs required by the Admin tests. Always run the User collection before the Admin collection for each complete test run. The environment file is overwritten with the latest values and does not need to be deleted manually.
+
+### HTML reports
+
+Each run generates an HTML report in the `newman/` directory with an automatically generated filename.
+
+To display test results in the terminal as well, replace `-r htmlextra` with `-r "cli,htmlextra"`.
+
+Exclude the `newman/` directory and `presentation.postman_environment.json` from Git.
+
+The collections create test users and bookings, and modify or delete bookings in the configured database. Use a development database for these runs.
